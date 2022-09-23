@@ -21,7 +21,7 @@ contract RevenueBasedLoan is ERC721 {
 
     // Percentage of monthly revenue the borrower will forward to pay for the loan
     // Two decimal points - Ex: 5.35% = 535
-    uint8 public immutable payoutRate;
+    uint16 public immutable payoutRate;
 
     // Number of loans that were emitted (NFTs minted). Serves as NFT id.
     uint64 public loansEmitted;
@@ -59,7 +59,7 @@ contract RevenueBasedLoan is ERC721 {
         string memory name_,
         string memory symbol_,
         uint256 loanAmount_,
-        uint8 payoutRate_,
+        uint16 payoutRate_,
         uint256 loanFee_,
         address borrower_,
         uint256 timeToFill_,

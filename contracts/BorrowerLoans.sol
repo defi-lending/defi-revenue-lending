@@ -9,7 +9,7 @@ contract BorrowerLoans {
 
     function createBorrowerLoan(
         uint256 loanAmount_,
-        uint8 payoutRate_, // Percentage of monthly revenue towards repayment. Two decimal points - Ex: 5.35% = 535
+        uint16 payoutRate_, // Percentage of monthly revenue towards repayment. Two decimal points - Ex: 5.35% = 535
         uint256 loanFee_,
         string memory baseURI_
     ) public returns (bool) {
