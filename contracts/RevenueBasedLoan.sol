@@ -4,9 +4,6 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract RevenueBasedLoan is ERC721 {
-    // Address of the borrower
-    address public immutable borrower;
-
     // Amount of Wei the borrower is asking
     uint256 public immutable loanAmount;
 
@@ -23,6 +20,7 @@ contract RevenueBasedLoan is ERC721 {
     uint256 public paidAmount;
 
     // Percentage of monthly revenue the borrower will forward to pay for the loan
+    // Two decimal points - Ex: 5.35% = 535
     uint8 public immutable payoutRate;
 
     // Number of loans that were emitted (NFTs minted). Serves as NFT id.
@@ -33,6 +31,9 @@ contract RevenueBasedLoan is ERC721 {
 
     // Time in days for lending the required amount before the loan request gets deprecated
     uint256 public immutable daysToFill;
+
+    // Address of the borrower
+    address public immutable borrower;
 
     // URI of Borrower's Stripe data at the time of creation
     string public baseURI;
@@ -64,6 +65,15 @@ contract RevenueBasedLoan is ERC721 {
         uint256 timeToFill_,
         string memory baseURI_
     ) ERC721(name_, symbol_) {
+        require(loanAmount_ > 0);
+        require(payoutRate_ > 0 && payoutRate_ <= 10000);
+        require(loanFee_ > 0);
+        require(borrower_ == tx.origin);
+        require(timeToFill_ > 0);
+        require(bytes(baseURI_).length > 0);
+        require(bytes(name_).length > 0);
+        require(bytes(symbol_).length > 0);
+
         loanAmount = loanAmount_;
         payoutRate = payoutRate_;
         loanFee = loanFee_;
@@ -79,7 +89,7 @@ contract RevenueBasedLoan is ERC721 {
             msg.value + fundedAmount <= loanAmount,
             "Exceeding the available loan amount"
         );
-        require(msg.value >= 0, "Can't lend 0 wei");
+        require(msg.value > 0, "Can't lend 0 wei");
         require(
             block.timestamp <= timeOfCreation + daysToFill * 24 * 3600,
             "Deprecated loan, not accepting deposits"
@@ -94,11 +104,11 @@ contract RevenueBasedLoan is ERC721 {
 
     // Function for the borrower to pay part of the loan
     function payLoan() public payable isActive {
-        require(msg.sender == borrower, "Not the borrower"); // Use this require?
+        require(msg.sender == borrower, "Not the borrower");
         require(
             paidAmount + msg.value <= loanAmount + loanFee,
             "Can't overpay the loan"
-        ); // this too?
+        );
 
         paidAmount += msg.value;
 
@@ -132,7 +142,10 @@ contract RevenueBasedLoan is ERC721 {
 
         uint256 maxPayout = calculateSettledPayout(_loanId) -
             idToWithdrawnAmount[_loanId];
-        require(_amount <= maxPayout);
+        require(
+            _amount <= maxPayout,
+            "Can't withdraw more than your percentage of the rapaid amount"
+        );
 
         idToWithdrawnAmount[_loanId] += _amount;
         (bool success, ) = msg.sender.call{value: _amount}("");
