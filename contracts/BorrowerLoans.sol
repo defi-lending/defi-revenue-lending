@@ -6,6 +6,11 @@ import "./RevenueBasedLoan.sol";
 contract BorrowerLoans {
     address[] public borrowers;
     mapping(address => address) public loanRequestAddresses;
+    event LoanRequestCreation(
+        address indexed borrower,
+        address loanRequest,
+        string baseURI
+    );
 
     function createBorrowerLoan(
         uint256 loanAmount_,
@@ -37,6 +42,8 @@ contract BorrowerLoans {
         );
         borrowers.push(msg.sender);
         loanRequestAddresses[msg.sender] = address(loanRequest);
+
+        emit LoanRequestCreation(msg.sender, address(loanRequest), baseURI_);
         return true;
     }
 
