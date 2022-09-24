@@ -15,6 +15,8 @@ import { BorrowLoanFormData, StripeReport } from "types";
 import ShowRevenueReport from "components/borrow-flow/ShowRevenueReport";
 import AddBorrowRequestDetails from "components/borrow-flow/AddBorrowDetails";
 import AddCompanyDetails from "components/borrow-flow/AddCompanyDetails";
+import useBorrowContract from "lib/hooks/useBorrowContract";
+import { LoopingRhombusesSpinner } from "react-epic-spinners";
 
 type AuthenticatedPageProps = InferGetServerSidePropsType<
   typeof getServerSideProps
@@ -32,6 +34,8 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
   // current step , defined in Steps enum
   const [step, setStep] = useState<Steps>(Steps.GET_STARTED);
   const [stripeReport, setStripeReport] = useState<StripeReport | null>(null);
+  const {createBorrowRequest} = useBorrowContract();
+  const [loading,setLoading] = useState<boolean>(false);
 
   const {
     register,
@@ -56,15 +60,18 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
     openConnectModal();
   }
 
-  const createBorrowRequest: SubmitHandler<BorrowLoanFormData> = (data) => {
-    console.log("Form Data", data);
-    console.log("Stripe Report", stripeReport);
-
-    // 1. Mint NFT from NFTPort 
-    // 2. Get tokenId
-    // 3. call createBorrowRequest from smart contract
-    // 4. Redirect to Marketplace
-  
+  const handleBorrowRequest: SubmitHandler<BorrowLoanFormData> = async (data) => {
+    setLoading(true)
+    try{
+      // generate metata
+      const metadata = { ...data , stripeReport };
+      console.log(metadata)
+      await createBorrowRequest(metadata.amount,metadata)
+        
+    }catch(err){
+      console.error(err);
+    }
+setLoading(false)
   };
 
   const renderBorrowFlow = useCallback(() => {
@@ -131,8 +138,14 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
     }
   }, [step]);
 
+  if (loading)
   return (
-    <form onSubmit={handleSubmit(createBorrowRequest)}>
+    <div className="flex items-center justify-center py-20">
+      <LoopingRhombusesSpinner color="rgb(59,130,240)" />
+    </div>
+  );
+  return (
+    <form onSubmit={handleSubmit(handleBorrowRequest)}>
       {renderBorrowFlow()}
     </form>
   );

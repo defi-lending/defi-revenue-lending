@@ -1,19 +1,22 @@
+import axios from "axios";
 import LendModal from "components/lend-flow/LendModal";
 import Button from "components/ui/Button";
 import Heading from "components/ui/Heading";
+import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
+import { ethers } from "ethers";
+import useLoanContract from "lib/hooks/useLoanContract";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React, { useState } from "react";
 import { FiExternalLink } from "react-icons/fi";
+import { chain } from "wagmi";
 
-type Props = {};
+type Props = InferGetServerSidePropsType<typeof getServerSideProps>
 
-const LoanPage = (props: Props) => {
+const LoanPage = ({metadata}: Props) => {
   const [lendModal,setLendModal] = useState<boolean>(false);
-  
-  const borrowRequestId = 1;
-  
   return (
     <>
-    <LendModal borrowerId={borrowRequestId} borrowerName={"<CompanyName here>"} isOpen={lendModal} setIsOpen={setLendModal}  />
+    <LendModal borrowerId={1} borrowerName={"<CompanyName here>"} isOpen={lendModal} setIsOpen={setLendModal}  />
     <div className="">
       <div className="flex   items-center gap-8">
         <img
@@ -46,18 +49,7 @@ const LoanPage = (props: Props) => {
           Buisness Description
         </h6>
         <p className="text-gray-800 ">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde amet
-          iste dolore, odit illum non est suscipit omnis tempore dolores enim
-          delectus autem quis praesentium quas similique magnam ipsum
-          reprehenderit fugit? Ab veniam cum recusandae. Fugit sint inventore
-          ullam ut vero asperiores, accusantium est quasi facilis veniam sed
-          dolorem libero laudantium ducimus, omnis iste qui et aspernatur
-          voluptas ex, quas nostrum porro temporibus? Nisi, obcaecati fugit.
-          Accusantium similique quae atque impedit at hic autem rerum
-          consequuntur vero, incidunt corrupti error qui fuga quam aut ad
-          mollitia. Officiis exercitationem molestiae reiciendis deserunt!
-          Blanditiis maxime doloremque iste architecto eius aspernatur eaque
-          deserunt!
+       {}
         </p>
         <h6 className="uppercase mt-4 mb-2  text-gray-500 font-medium">
           Links
@@ -93,5 +85,26 @@ const LoanPage = (props: Props) => {
             </>
   );
 };
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const loanAddress = context?.params?.address as string;
+
+  const provider = new ethers.providers.AlchemyProvider(
+    chain.polygonMumbai.id,
+    process.env.ALCHEMY_KEY
+  );
+
+  const loanContract = new ethers.Contract(loanAddress,NFT_ABI,provider);
+  const metadataUri = await loanContract.baseURI();
+  const metadataRes = await axios.get(metadataUri.replace("ipfs://","https://ipfs.io/ipfs/"))
+  const metadata = metadataRes.data
+  return {
+    props: {
+      metadata
+    }
+  }
+
+}
 
 export default LoanPage;

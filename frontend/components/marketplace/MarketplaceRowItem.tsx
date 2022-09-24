@@ -1,11 +1,13 @@
 import Link from "next/link";
 import React from "react";
 
-type Props = {};
+type Props = {
+  data:any
+};
 
 const MarketplaceRowItem = (props: Props) => {
   return (
-    <Link href={'markets/<id-here>'}>
+    <Link href={`/loans/${props.data}`}>
       <tr className="bg-white border-b cursor-pointer hover:bg-gray-50 ">
         <th
           scope="row"
