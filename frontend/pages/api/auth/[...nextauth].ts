@@ -29,7 +29,10 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           );
 
           const nextAuthUrl =
-            `https://${process.env.VERCEL_URL}` || process.env.NEXTAUTH_URL;
+            process.env.NEXTAUTH_URL ||
+            (process.env.VERCEL_URL
+              ? `https://${process.env.VERCEL_URL}`
+              : null);
           if (!nextAuthUrl) {
             return null;
           }

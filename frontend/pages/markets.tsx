@@ -49,7 +49,7 @@ const MarketsPage: NextPage = (props: Props) => {
     }
     setLoading(false);
   };
-  
+
   useEffect(() => {
     getAllBorrowers();
   }, [borrowContract]);
@@ -61,7 +61,7 @@ const MarketsPage: NextPage = (props: Props) => {
         <div>Loading Marketplace ...</div>
       </div>
     );
-
+ 
   return (
     <div>
       <Heading className="mb-8">Explore Marketplace</Heading>
