@@ -138,7 +138,7 @@ const BorrowDashboard = (props: Props) => {
           <p className="font-medium text-gray-500 text-sm">
             Repayable Amount :
           </p>
-          <p>{loan?.amount * 1.1} MATIC</p>
+          <p>{(loan?.amount * 1.1).toFixed(2)} MATIC</p>
         </div>
         <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
@@ -151,7 +151,7 @@ const BorrowDashboard = (props: Props) => {
             Total Repayed Amount :{" "}
           </p>
           <p>
-            {loan?.repayedAmount} / {loan?.amount * 1.1}MATIC
+            {loan?.repayedAmount.toFixed(2)} / {(loan?.amount * 1.1).toFixed(2)}MATIC
           </p>
         </div>{" "}
         <div className="mb-2">
@@ -168,7 +168,7 @@ const BorrowDashboard = (props: Props) => {
                 step={(Number(loan?.filledAmount) / 10).toFixed(2)}
                 type="range"
                 min={0}
-                max={Number(loan?.filledAmount).toFixed(2)}
+                max={Number(loan?.filledAmount*1.1).toFixed(2)}
               />
             </label>
             <Button

@@ -75,7 +75,7 @@ const LendModal = ({
         <div className="text-gray-600 font-medium text-sm">
           Transaction Hash:
         </div>
-        <a target={"_blank"} rel='noreferrer' href={`https://mumbai.polygonscan.com/address/${tx?.hash}`} className="text-sm flex items-center gap-2 text-blue-500 hover:underline underline-offset-4">View on etherscan <FiExternalLink/></a>
+        <a target={"_blank"} rel='noreferrer' href={`https://mumbai.polygonscan.com/tx/${tx?.hash}`} className="text-sm flex items-center gap-2 text-blue-500 hover:underline underline-offset-4">View on etherscan <FiExternalLink/></a>
       </div>
       <div>
         <div className="text-gray-600 font-medium text-sm">
