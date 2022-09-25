@@ -5,12 +5,12 @@ import {
 } from "contracts/borrowContracts";
 import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
 import { Contract, ethers } from "ethers";
-import { useContract, useProvider, useSigner } from "wagmi";
+import { chain, useContract, useProvider, useSigner } from "wagmi";
 
 const useBorrowContract = () => {
   const INTEREST_RATE = 0.1; // Fixed at 10% for now
   const { data: signer } = useSigner();
-  const provider = useProvider({ chainId: 8001 });
+  const provider = useProvider({chainId:3001});
 
   // instance of borrow contract
   const borrowContract: Contract = useContract({

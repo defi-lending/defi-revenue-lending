@@ -21,35 +21,37 @@ const MarketsPage: NextPage = (props: Props) => {
   const [loans, setLoans] = useState<object[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { borrowContract } = useBorrowContract();
+
+  const getAllBorrowers = async () => {
+    setLoading(true);
+    try {
+      const filter = borrowContract.filters.LoanRequestCreation(
+        null,
+        null,
+        null
+      );
+      // const loanRequests = await Promise.all(promises)
+      const query = await borrowContract.queryFilter(filter);
+      let _loans = await query.map(async (item) => {
+        if (item.args) {
+          const metadataUri = item?.args[2];
+          const loanAddress = item?.args[1];
+          const { data } = await axios.get(
+            metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
+          );
+          return { ...data, loanAddress };
+        }
+      });
+      _loans = await Promise.all(_loans);
+      setLoans(_loans);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+  
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const filter = borrowContract.filters.LoanRequestCreation(
-          null,
-          null,
-          null
-        );
-        // const loanRequests = await Promise.all(promises)
-        const query = await borrowContract.queryFilter(filter);
-        let _loans = await query.map(async (item) => {
-          if (item.args) {
-            const metadataUri = item?.args[2];
-            const loanAddress = item?.args[1];
-            const { data } = await axios.get(
-              metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
-            );
-            return {...data,loanAddress}
-          }
-        });
-        _loans = await Promise.all(_loans);
-        setLoans(_loans)
-      } catch (err) {
-        console.error(err);
-      }
-      console.log(loans);
-      setLoading(false);
-    })();
+    getAllBorrowers();
   }, [borrowContract]);
 
   if (loading)
