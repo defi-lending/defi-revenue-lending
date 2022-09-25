@@ -26,7 +26,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
                     !outline && variant === 'primary',
                     'bg-zinc-200 hover:bg-zinc-300 active:bg-zinc-300 text-black focus:ring-1  ring-gray-600':
                     !outline && variant === 'secondary',
-                    'bg-emerald-600 hover:bg-emerald-600/75 active:bg-emerald-600/75  focus:ring-1 ring-emerald-100 text-white':
+                    'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-600  focus:ring-1 ring-emerald-100 text-white':
                     !outline && variant === 'success',
                     'bg-rose-600 hover:bg-rose-600/75 active:bg-rose-600/75  focus:ring-1 ring-rose-100 text-white':
                     !outline && variant === 'danger',
