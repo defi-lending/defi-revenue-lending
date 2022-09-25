@@ -2,12 +2,10 @@ import axios from "axios";
 import Button from "components/ui/Button";
 import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
 import { Contract, ethers } from "ethers";
-import { TransactionTypes } from "ethers/lib/utils";
 import useBorrowContract from "lib/hooks/useBorrowContract";
-import useLoanContract from "lib/hooks/useLoanContract";
 import React, { useEffect, useState } from "react";
 import { LoopingRhombusesSpinner } from "react-epic-spinners";
-import { useAccount, useSigner, useSignMessage } from "wagmi";
+import { useAccount, useSigner,  } from "wagmi";
 
 type Props = {};
 
@@ -22,7 +20,7 @@ const BorrowDashboard = (props: Props) => {
   const [repayLoading, setRepayLoading] = useState<boolean>(false);
   const [repayAmount, setRepayAmount] = useState<number>(0);
 
-  if (!address) {
+  if (!address || !loan) {
     return <div></div>;
   }
 
@@ -75,7 +73,7 @@ const BorrowDashboard = (props: Props) => {
     setRepayLoading(true);
     try {
       const repayTx = await loanContract.payLoan({
-        value: Number(ethers.constants.WeiPerEther) * repayAmount,
+        value: ethers.utils.parseEther(repayAmount.toString()),
       });
       await repayTx.wait();
       alert("Repayment Successfull");
