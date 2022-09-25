@@ -1,3 +1,4 @@
+import axios from "axios";
 import MarketplaceRowItem from "components/marketplace/MarketplaceRowItem";
 import Heading from "components/ui/Heading";
 import useBorrowContract from "lib/hooks/useBorrowContract";
@@ -17,15 +18,36 @@ type MarketplaceItem = {
 };
 
 const MarketsPage: NextPage = (props: Props) => {
-  const [loans, setLoans] = useState<any>([]);
+  const [loans, setLoans] = useState<object[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { getAllBorrowers } = useBorrowContract();
+  const { borrowContract } = useBorrowContract();
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const data = await getAllBorrowers();
-      setLoans(data);
+      try {
+        const filter = borrowContract.filters.LoanRequestCreation(
+          null,
+          null,
+          null
+        );
+        // const loanRequests = await Promise.all(promises)
+        const query = await borrowContract.queryFilter(filter);
+        let _loans = await query.map(async (item) => {
+          if (item.args) {
+            const metadataUri = item?.args[2];
+            const loanAddress = item?.args[1];
+            const { data } = await axios.get(
+              metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
+            );
+            return {...data,loanAddress}
+          }
+        });
+        _loans = await Promise.all(_loans);
+        setLoans(_loans)
+      } catch (err) {
+        console.error(err);
+      }
       console.log(loans);
       setLoading(false);
     })();
@@ -54,10 +76,8 @@ const MarketsPage: NextPage = (props: Props) => {
             <th scope="col" className="py-3 px-6 text-center">
               Loan Requested
             </th>
-            <th scope="col" className="py-3 px-6 text-center">
-              Loan Filled ( % )
-            </th>
-            <th scope="col" className="py-3 px-6 text-right" >
+
+            <th scope="col" className="py-3 px-6 text-right">
               Interest Rate
             </th>
           </tr>

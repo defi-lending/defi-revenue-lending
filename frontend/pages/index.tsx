@@ -1,4 +1,5 @@
 import Button from "components/ui/Button";
+import Link from "next/link";
 import React from "react";
 
 type Props = {};
@@ -18,7 +19,9 @@ const Home = (props: Props) => {
             <br />
             Lending / Borrowing
           </h1>
+          <Link href={'/markets'}>
           <Button variant='success' size='lg'>Explore Marketplace</Button>
+          </Link>
         </div>
         {/* Hero Right Side */}
         <div></div>

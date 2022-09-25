@@ -27,9 +27,7 @@ const MarketplaceRowItem = ({ data }: Props) => {
           {data?.stripeReport?.currency.toUpperCase()}
         </td>
         <td className="py-4 px-6 text-center">{data?.amount} MATIC</td>
-        <td className="py-4 px-6 text-center">
-          {((Number(ethers.utils.formatEther(data?.loanFilled)) / data?.amount) * 100).toFixed(2)}%
-        </td>
+
         <td className="py-4 px-6 text-right">10%</td>
       </tr>
     </Link>
