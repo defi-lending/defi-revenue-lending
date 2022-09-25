@@ -94,12 +94,13 @@ const LoanPage = ({ loanAddress }: Props) => {
   const claimRepayment = async (amount: number, id: number) => {
     try {
       if (!signer) throw new Error("Signer Not Found");
-      const contract = new ethers.Contract(loanAddress, NFT_ABI, provider);
-      const claimTx = await contract.withdrawLender();
+      const contract = new ethers.Contract(loanAddress, NFT_ABI, signer);
+      const claimTx = await contract.withdrawLender(ethers.utils.parseEther(amount.toString()),id.toString());
       await claimTx.wait();
       alert("Claim Successfull");
       window.location.reload();
     } catch (err) {
+      alert(err);
       console.error(err);
     }
   };

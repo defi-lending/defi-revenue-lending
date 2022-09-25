@@ -43,8 +43,8 @@ const BorrowDashboard = (props: Props) => {
           let lends = await loanContract.loansEmitted();
           lends = lends.toString();
           // total amont repayed to lenders
-          let repayedAmount = await loanContract.paidAmount();
-          repayedAmount = ethers.utils.formatEther(repayedAmount);
+          let repaidAmount = await loanContract.paidAmount();
+          repaidAmount = ethers.utils.formatEther(repaidAmount);
           // amount withdrawn by the owner
           let withdrawnAmount = await loanContract.withdrawnAmount();
           withdrawnAmount = ethers.utils.formatEther(withdrawnAmount);
@@ -59,7 +59,7 @@ const BorrowDashboard = (props: Props) => {
             filledInWei,
             filledAmount,
             lends,
-            repayedAmount,
+            repaidAmount,
             withdrawnAmount,
           });
           console.log(loan);
@@ -138,7 +138,7 @@ const BorrowDashboard = (props: Props) => {
           <p className="font-medium text-gray-500 text-sm">
             Repayable Amount :
           </p>
-          <p>{(loan?.amount * 1.1).toFixed(2)} MATIC</p>
+          <p>{Number(loan?.amount * 1.1).toFixed(2)} MATIC</p>
         </div>
         <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
@@ -148,10 +148,10 @@ const BorrowDashboard = (props: Props) => {
         </div>
         <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
-            Total Repayed Amount :{" "}
+            Total Repaid Amount :{" "}
           </p>
           <p>
-            {loan?.repayedAmount.toFixed(2)} / {(loan?.amount * 1.1).toFixed(2)}MATIC
+            {Number(loan?.repaidAmount).toFixed(2)} / {Number((loan?.amount * 1.1)).toFixed(2)}MATIC
           </p>
         </div>{" "}
         <div className="mb-2">

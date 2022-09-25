@@ -82,7 +82,7 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
           provider
         );
         const res = await borrowContract.loanRequestAddresses(address);
-        if(res!=ethers.constants.AddressZero){
+        if (res != ethers.constants.AddressZero) {
           alert('you already have a borrow loan request active')
           router.push('/dashboard');
         }
@@ -113,10 +113,7 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
           <div className="flex flex-col items-center justify-center ">
             <Heading>Ready to get started? </Heading>
             <p className=" max-w-2xl my-8 text-center">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt
-              provident similique vitae rem tenetur est facilis praesentium
-              odit, deserunt blanditiis velit recusandae iste inventore optio?
-              Dolores optio qui modi deleniti.
+
             </p>
             <Button
               onClick={() => setStep(Steps.CONNECT_STRIPE)}
@@ -188,7 +185,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = await getToken({ req: context.req });
 
   const address = token?.sub ?? null;
-  
+
   // if we have address value , server knows we are authenticated
 
   return {
