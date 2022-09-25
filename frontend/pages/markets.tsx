@@ -21,7 +21,6 @@ const MarketsPage: NextPage = (props: Props) => {
   const [loans, setLoans] = useState<object[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { borrowContract } = useBorrowContract();
-
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -51,7 +50,7 @@ const MarketsPage: NextPage = (props: Props) => {
       console.log(loans);
       setLoading(false);
     })();
-  }, []);
+  }, [borrowContract]);
 
   if (loading)
     return (

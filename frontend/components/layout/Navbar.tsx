@@ -6,14 +6,14 @@ import Logo from "./Logo";
 
 type Props = {};
 
-const Navlink = (props: { children: React.ReactNode } & LinkProps) => {
+const Navlink = (props: { children: React.ReactNode ,link:string}) => {
   const router = useRouter();
 
-  const isCurrentPath = router.asPath === props.href;
+  const isCurrentPath = router.asPath === props.link;
 
   return (
-    <Link href={props.href}>
       <a
+        href={props.link}
         className={`font-medium duration-300 ease-out py-2 px-3  hover:text-black  rounded-lg ${
           isCurrentPath ? " bg-gray-200 text-black" : " text-gray-500"
         }`}
@@ -21,7 +21,6 @@ const Navlink = (props: { children: React.ReactNode } & LinkProps) => {
         {" "}
         {props.children}
       </a>
-    </Link>
   );
 };
 const Navbar = (props: Props) => {
@@ -31,9 +30,9 @@ const Navbar = (props: Props) => {
       <nav className="flex max-w-screen-xl mx-auto justify-between">
         <div className="flex items-center space-x-4">
           <Logo />
-          <Navlink href="/markets">Marketplace</Navlink>
-          {signer && <Navlink href="/borrow">Borrow</Navlink>}
-          {signer && <Navlink href="/dashboard">Dashboard</Navlink>}
+          <Navlink link="/markets">Marketplace</Navlink>
+          {signer && <Navlink link="/borrow">Borrow</Navlink>}
+          {signer && <Navlink link="/dashboard">Dashboard</Navlink>}
         </div>
         {/* <Button loading variant="primary">Connect Wallet</Button> */}
         <ConnectButton />

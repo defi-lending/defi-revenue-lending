@@ -19,9 +19,9 @@ const Home = (props: Props) => {
             <br />
             Lending / Borrowing
           </h1>
-          <Link href={'/markets'}>
+          <a href={'/markets'}>
           <Button variant='success' size='lg'>Explore Marketplace</Button>
-          </Link>
+          </a>
         </div>
         {/* Hero Right Side */}
         <div></div>
