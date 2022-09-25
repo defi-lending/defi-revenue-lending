@@ -11,7 +11,7 @@ export default async function handler(
     const stripeKey = req.body.stripeKey;
     if (!stripeKey) throw new Error("No stripe key provided");
     const report = await axios.get(
-      `https://revenue-based-loan-nft.herokuapp.com/borrowers/:borrowerId/stripe_reports`
+      `https://revenue-based-loan-nft.herokuapp.com/borrowers/${stripeKey}/stripe_reports`
     );
 
     const data = report.data;

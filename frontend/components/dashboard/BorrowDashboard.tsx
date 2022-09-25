@@ -2,6 +2,7 @@ import axios from "axios";
 import Button from "components/ui/Button";
 import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
 import { Contract, ethers } from "ethers";
+import { TransactionTypes } from "ethers/lib/utils";
 import useBorrowContract from "lib/hooks/useBorrowContract";
 import useLoanContract from "lib/hooks/useLoanContract";
 import React, { useEffect, useState } from "react";
@@ -17,7 +18,12 @@ const BorrowDashboard = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loanContract, setLoanContract] = useState<Contract>({} as Contract);
   const { data: signer } = useSigner();
- 
+  const [withdrawoading,setWithdrawLoading] = useState<boolean>(false);
+  const [repayLoading,setRepayLoading] = useState<boolean>(false);
+
+  
+
+
   if (!address) {
     return <div></div>;
   }
@@ -31,11 +37,12 @@ const BorrowDashboard = (props: Props) => {
 
         const loanContract = new ethers.Contract(loanAddress, NFT_ABI, signer);
         setLoanContract(loanContract);
+
         if (loanAddress) {
           const metadataURI = await loanContract.baseURI();
           //amount already filled
-          let filled = await loanContract.fundedAmount();
-          filled = ethers.utils.formatEther(filled);
+          let filledInWei = await loanContract.fundedAmount();
+          const filledAmount = ethers.utils.formatEther(filledInWei);
           // number of lenders
           let lends = await loanContract.loansEmitted();
           lends = lends.toString();
@@ -53,7 +60,8 @@ const BorrowDashboard = (props: Props) => {
           setLoan({
             ...metadata,
             loanAddress,
-            filled,
+            filledInWei,
+            filledAmount,
             lends,
             repayedAmount,
             withdrawnAmount,
@@ -65,6 +73,33 @@ const BorrowDashboard = (props: Props) => {
     }
   }, [signer]);
 
+  const handleRepay = async (amount:number) => {
+    setRepayLoading(true)
+    try{
+      const repayTx = await loanContract.payLoan(amount)
+      await repayTx.wait();
+      alert('Repayment Successfull')
+    } catch (err){
+        console.error(err)
+    }
+    setRepayLoading(false)
+  }
+
+  const handleWithdraw = async  () => {
+    setWithdrawLoading(true)
+    try{
+      console.log(loan?.filledInWei)
+      const tx = await loanContract.withdrawBorrower(loan?.filledInWei)
+      await tx.wait()
+      console.log(tx);
+      alert("withdraw successfull")
+    }catch(err){
+      alert('Loan has not been filled')
+      console.log(err)
+    }
+    setWithdrawLoading(false) 
+  }
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -90,11 +125,10 @@ const BorrowDashboard = (props: Props) => {
         <div className="mb-2">
           <p className="font-medium text-sm text-gray-500 ">Loan Filled :</p>
           <p>
-            {Number(loan?.filled).toFixed(2)} / {loan?.amount} MATIC ({" "}
-            {((loan?.filled / loan?.amount) * 100).toFixed(2)}% )
+            {Number(loan?.filledAmount).toFixed(2)} / {loan?.amount} MATIC
           </p>
         </div>
-        <Button variant="success" className="mt-4"> Withdraw funds</Button>
+        <Button variant="success" className="mt-4" onClick={handleWithdraw}> Withdraw funds</Button>
       </div>
 
       <div className="bg-white border rounded-lg p-6">
@@ -123,7 +157,7 @@ const BorrowDashboard = (props: Props) => {
           <p>
             {loan?.withdrawnAmount} MATIC 
           </p>
-          <Button variant="primary" className="mt-4">Repay Lenders</Button>
+          <Button variant="primary" className="mt-4" loading={repayLoading} >Repay Lenders</Button>
         </div>
       </div>
     </div>

@@ -27,7 +27,6 @@ const dashboard = ({address}: Props) => {
           <BorrowDashboard/>
         </Tab.Panel>
         <Tab.Panel>
-
           <LendDashboard/>
         </Tab.Panel>
       </Tab.Panels>

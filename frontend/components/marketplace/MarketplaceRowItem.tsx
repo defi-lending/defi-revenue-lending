@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import Link from "next/link";
 import React from "react";
 import { BorrowLoanFormData, StripeReport } from "types";
@@ -27,7 +28,7 @@ const MarketplaceRowItem = ({ data }: Props) => {
         </td>
         <td className="py-4 px-6 text-center">{data?.amount} MATIC</td>
         <td className="py-4 px-6 text-center">
-          {(data?.loanFilled / data?.amount) * 100}%
+          {((Number(ethers.utils.formatEther(data?.loanFilled)) / data?.amount) * 100).toFixed(2)}%
         </td>
         <td className="py-4 px-6 text-right">10%</td>
       </tr>
