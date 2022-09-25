@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   GetServerSideProps,
   InferGetServerSidePropsType,
@@ -17,6 +17,14 @@ import AddBorrowRequestDetails from "components/borrow-flow/AddBorrowDetails";
 import AddCompanyDetails from "components/borrow-flow/AddCompanyDetails";
 import useBorrowContract from "lib/hooks/useBorrowContract";
 import { LoopingRhombusesSpinner } from "react-epic-spinners";
+import { chain } from "wagmi";
+import { ethers } from "ethers";
+import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
+import {
+  BORROW_CONTRACT_ABI,
+  BORROW_CONTRACT_ADDRESS,
+} from "contracts/borrowContracts";
+import { useRouter } from "next/router";
 
 type AuthenticatedPageProps = InferGetServerSidePropsType<
   typeof getServerSideProps
@@ -34,9 +42,9 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
   // current step , defined in Steps enum
   const [step, setStep] = useState<Steps>(Steps.GET_STARTED);
   const [stripeReport, setStripeReport] = useState<StripeReport | null>(null);
-  const {createBorrowRequest} = useBorrowContract();
-  const [loading,setLoading] = useState<boolean>(false);
-
+  const { createBorrowRequest } = useBorrowContract();
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
   const {
     register,
     formState: { errors },
@@ -60,18 +68,41 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
     openConnectModal();
   }
 
-  const handleBorrowRequest: SubmitHandler<BorrowLoanFormData> = async (data) => {
-    setLoading(true)
-    try{
+  useEffect(() => {
+    if (address) {
+      (async () => {
+        const provider = new ethers.providers.AlchemyProvider(
+          chain.polygonMumbai.id,
+          process.env.ALCHEMY_KEY
+        );
+
+        const borrowContract = new ethers.Contract(
+          BORROW_CONTRACT_ADDRESS,
+          BORROW_CONTRACT_ABI,
+          provider
+        );
+        const res = await borrowContract.loanRequestAddresses(address);
+        if(res!=ethers.constants.AddressZero){
+          alert('you already have a borrow loan request active')
+          router.push('/dashboard');
+        }
+      })();
+    }
+  }, []);
+
+  const handleBorrowRequest: SubmitHandler<BorrowLoanFormData> = async (
+    data
+  ) => {
+    setLoading(true);
+    try {
       // generate metata
-      const metadata = { ...data , stripeReport };
-      console.log(metadata)
-      await createBorrowRequest(metadata.amount,metadata)
-        
-    }catch(err){
+      const metadata = { ...data, stripeReport };
+      console.log(metadata);
+      await createBorrowRequest(metadata.amount, metadata);
+    } catch (err) {
       console.error(err);
     }
-setLoading(false)
+    setLoading(false);
   };
 
   const renderBorrowFlow = useCallback(() => {
@@ -139,11 +170,11 @@ setLoading(false)
   }, [step]);
 
   if (loading)
-  return (
-    <div className="flex items-center justify-center py-20">
-      <LoopingRhombusesSpinner color="rgb(59,130,240)" />
-    </div>
-  );
+    return (
+      <div className="flex items-center justify-center py-20">
+        <LoopingRhombusesSpinner color="rgb(59,130,240)" />
+      </div>
+    );
   return (
     <form onSubmit={handleSubmit(handleBorrowRequest)}>
       {renderBorrowFlow()}
@@ -156,6 +187,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = await getToken({ req: context.req });
 
   const address = token?.sub ?? null;
+  
   // if we have address value , server knows we are authenticated
 
   return {

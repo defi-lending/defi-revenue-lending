@@ -17,29 +17,27 @@ type MarketplaceItem = {
 };
 
 const MarketsPage: NextPage = (props: Props) => {
-  const [loans,setLoans] = useState<any>([]);
-  const [loading,setLoading] = useState<boolean>(false);
-  const marketplaceItems = [{}, {}, {}, {}, {}];
-  const {getAllBorrowers } = useBorrowContract();
+  const [loans, setLoans] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { getAllBorrowers } = useBorrowContract();
 
-  useEffect(()=>{
-    ( async ()=> {
-      setLoading(true)
-      const data = await getAllBorrowers()
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const data = await getAllBorrowers();
       setLoans(data);
-      setLoading(false)
-    })()
-  },[])
+      console.log(loans);
+      setLoading(false);
+    })();
+  }, []);
 
   if (loading)
-  return (
-    <div className="flex flex-col space-y-8 items-center justify-center py-28">
-      <LoopingRhombusesSpinner color="rgb(59,130,240)" />
-      <div>
-      Loading Marketplace ... 
+    return (
+      <div className="flex flex-col space-y-8 items-center justify-center py-28">
+        <LoopingRhombusesSpinner color="rgb(59,130,240)" />
+        <div>Loading Marketplace ...</div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div>
@@ -47,30 +45,26 @@ const MarketsPage: NextPage = (props: Props) => {
       <table className="w-full text-left text-gray-800 ">
         <thead className="text-xs border-y text-gray-700 uppercase bg-gray-50 ">
           <tr>
-            <th scope="col" className="py-3 px-6">
+            <th scope="col" className="py-3 px-6 text-left">
               Borrower
             </th>
-            <th scope="col" className="py-3 px-6">
+            <th scope="col" className="py-3 px-6 text-center">
               Revenue
             </th>
-            <th scope="col" className="py-3 px-6">
+            <th scope="col" className="py-3 px-6 text-center">
               Loan Requested
             </th>
-            <th scope="col" className="py-3 px-6">
+            <th scope="col" className="py-3 px-6 text-center">
               Loan Filled ( % )
             </th>
-            <th scope="col" className="py-3 px-6">
+            <th scope="col" className="py-3 px-6 text-right" >
               Interest Rate
-            </th>
-            <th scope="col" className="py-3 px-6">
-              Status
             </th>
           </tr>
         </thead>
         <tbody>
-          {loans.map((item:any, index:number) => (
-
-            <MarketplaceRowItem key={index} data={item}/>
+          {loans?.map((item: any, index: number) => (
+            <MarketplaceRowItem key={index} data={item} />
           ))}
         </tbody>
       </table>
