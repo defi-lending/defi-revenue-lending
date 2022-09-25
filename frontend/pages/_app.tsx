@@ -12,8 +12,11 @@ import {
   RainbowKitSiweNextAuthProvider,
   GetSiweMessageOptions,
 } from "@rainbow-me/rainbowkit-siwe-next-auth";
-import { publicProvider } from "wagmi/providers/public";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 import "@rainbow-me/rainbowkit/styles.css";
+import React from "react";
+import { Router } from "next/router";
+import { LoopingRhombusesSpinner } from "react-epic-spinners";
 
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
   statement: "Sign in to Revenue based defi app",
@@ -21,7 +24,7 @@ const getSiweMessageOptions: GetSiweMessageOptions = () => ({
 
 const { chains, provider } = configureChains(
   [chain.polygonMumbai],
-  [publicProvider()]
+  [alchemyProvider({apiKey:process.env.NEXT_PUBLIC_ALCHEMY_KEY})]
 );
 
 const { connectors } = getDefaultWallets({
@@ -36,6 +39,25 @@ const wagmiClient = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const [loading, setLoading] = React.useState(false);
+  React.useEffect(() => {
+    const start = () => {
+      console.log("start");
+      setLoading(true);
+    };
+    const end = () => {
+      console.log("finished");
+      setLoading(false);
+    };
+    Router.events.on("routeChangeStart", start);
+    Router.events.on("routeChangeComplete", end);
+    Router.events.on("routeChangeError", end);
+    return () => {
+      Router.events.off("routeChangeStart", start);
+      Router.events.off("routeChangeComplete", end);
+      Router.events.off("routeChangeError", end);
+    };
+  }, []);
   return (
     <WagmiConfig client={wagmiClient}>
       <SessionProvider session={pageProps.session} refetchInterval={0}>
@@ -47,7 +69,9 @@ function MyApp({ Component, pageProps }: AppProps) {
             chains={chains}
           >
             <AppContainer>
-              <Component {...pageProps} />
+            {loading ?  <div className="flex items-center justify-center gap-8 py-20">
+        <LoopingRhombusesSpinner color="rgb(59,130,240)" />
+      </div> : <Component {...pageProps} />}
             </AppContainer>
           </RainbowKitProvider>
         </RainbowKitSiweNextAuthProvider>

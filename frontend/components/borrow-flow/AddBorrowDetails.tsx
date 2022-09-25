@@ -33,14 +33,10 @@ const AddBorrowRequestDetails = ({
       <h6 className="text-sm font-bold text-brand-500 ">LOAN DETAILS</h6>
 
       <Input
-        pre={
-          <div className="text-sm font-medium">
-            {report?.currency.toUpperCase()}
-          </div>
-        }
+      step={0.1}
         type="number"
-        label="Borrow Amount"
-        placeholder="Enter borrow amount"
+        label="Borrow Amount (in MATIC )"
+        placeholder="Enter borrow amount ( in MATIC )"
         {...register("amount")}
       />
       <Input
@@ -53,7 +49,7 @@ const AddBorrowRequestDetails = ({
       />
       <p>
         Total Repayable Amount : {currencyFormat(watch("amount") * 1.1 || 0)}{" "}
-        {report?.currency.toUpperCase()}
+        MATIC
       </p>
       <div className="grid grid-cols-2 gap-4 pt-6">
         <Button
