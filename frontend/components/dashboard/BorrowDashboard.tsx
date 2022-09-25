@@ -124,7 +124,7 @@ const BorrowDashboard = (props: Props) => {
         <div className="mb-2">
           <p className="font-medium text-sm text-gray-500 ">Loan Filled :</p>
           <p>
-            {Number(loan?.filledAmount).toFixed(2)} / {loan?.amount} MATIC
+            {Number(loan?.filledAmount).toFixed(2)} / {Number(loan?.amount).toFixed(2)} MATIC
           </p>
         </div>
         <Button variant="success" className="mt-4" loading={withdrawLoading} onClick={handleWithdraw}>
@@ -168,7 +168,7 @@ const BorrowDashboard = (props: Props) => {
                 step={(Number(loan?.filledAmount) / 10).toFixed(2)}
                 type="range"
                 min={0}
-                max={Number(loan?.filledAmount*1.1).toFixed(2)}
+                max={Number(loan?.filledAmount*1.1 - loan?.repaidAmount ).toFixed(2)}
               />
             </label>
             <Button
