@@ -12,7 +12,7 @@ import {
   RainbowKitSiweNextAuthProvider,
   GetSiweMessageOptions,
 } from "@rainbow-me/rainbowkit-siwe-next-auth";
-import { publicProvider } from "wagmi/providers/public";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 import "@rainbow-me/rainbowkit/styles.css";
 import React from "react";
 import { Router } from "next/router";
@@ -24,7 +24,7 @@ const getSiweMessageOptions: GetSiweMessageOptions = () => ({
 
 const { chains, provider } = configureChains(
   [chain.polygonMumbai],
-  [publicProvider()]
+  [alchemyProvider({apiKey:process.env.NEXT_PUBLIC_ALCHEMY_KEY})]
 );
 
 const { connectors } = getDefaultWallets({

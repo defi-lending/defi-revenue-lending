@@ -1,3 +1,4 @@
+import Button from "components/ui/Button";
 import React from "react";
 
 type Props = {};
@@ -8,8 +9,8 @@ const Home = (props: Props) => {
       {/* Hero Section */}
       <section className="py-20">
         {/* Hero Left Side */}
-        <div>
-          <h1 className="text-5xl text-gray-800 font-medium leading-normal">
+        <div className="flex flex-col gap-8 items-center justify-center">
+          <h1 className="text-5xl text-gray-800 text-center font-medium  leading-normal">
             Introducing <br />
             <span className="font-bold bg-brand-500 text-white px-4">
               Revenue based defi
@@ -17,6 +18,7 @@ const Home = (props: Props) => {
             <br />
             Lending / Borrowing
           </h1>
+          <Button variant='success' size='lg'>Explore Marketplace</Button>
         </div>
         {/* Hero Right Side */}
         <div></div>

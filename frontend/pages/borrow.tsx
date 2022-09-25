@@ -99,7 +99,7 @@ const BorrowPage: NextPage = ({ address }: AuthenticatedPageProps) => {
       const metadata = { ...data, stripeReport };
       console.log(metadata);
       await createBorrowRequest(metadata.amount, metadata);
-      router.push("/markets")
+      router.push("/dashboard")
     } catch (err) {
       console.error(err);
     }

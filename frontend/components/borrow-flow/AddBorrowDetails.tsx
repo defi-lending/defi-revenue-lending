@@ -33,11 +33,7 @@ const AddBorrowRequestDetails = ({
       <h6 className="text-sm font-bold text-brand-500 ">LOAN DETAILS</h6>
 
       <Input
-        pre={
-          <div className="text-sm font-medium">
-            {"MATIC"}
-          </div>
-        }
+      step={0.1}
         type="number"
         label="Borrow Amount (in MATIC )"
         placeholder="Enter borrow amount ( in MATIC )"

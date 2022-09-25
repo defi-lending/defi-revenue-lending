@@ -1,13 +1,14 @@
 import axios from "axios";
 import LendModal from "components/lend-flow/LendModal";
+import RepayClaim from "components/repay-flow/RepayClaim";
 import Button from "components/ui/Button";
 import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
 import { Contract, ethers } from "ethers";
 import { GetServerSideProps } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiExternalLink } from "react-icons/fi";
 import { BorrowLoanFormData, StripeReport } from "types";
-import { chain, useSigner } from "wagmi";
+import { chain, useProvider, useSigner } from "wagmi";
 
 type BorrowerMetadata = BorrowLoanFormData & { stripeReport: StripeReport } & {
   borrowerAddress: string;
@@ -17,30 +18,68 @@ type BorrowerMetadata = BorrowLoanFormData & { stripeReport: StripeReport } & {
 
 type Props = {
   metadata: BorrowerMetadata;
-  loanContract:Contract
-  loanAddress:string 
+  loanContract: Contract;
+  loanAddress: string;
 };
 
-
-
-const LoanPage = ({ metadata , loanAddress }: Props) => {
+const LoanPage = ({ metadata, loanAddress }: Props) => {
   const [lendModal, setLendModal] = useState<boolean>(false);
-  console.log({ metadata });
-  const {data:signer} = useSigner();
+  const { data: signer } = useSigner();
+  const [lender, setLender] = useState<any>(null);
+  const provider = useProvider();
+  const handleLend = async (_value: number) => {
+    try {
+      if (!signer) throw new Error("Signer Not Found");
 
-  const handleLend =async (_value:number) => {
-    try{
-      if(!signer) throw new Error("Signer Not Found")
-
-      const contract = new ethers.Contract(loanAddress,NFT_ABI,signer) ;
-      const lendTx = await contract.lend({value:ethers.utils.parseEther(_value.toString())})
+      const contract = new ethers.Contract(loanAddress, NFT_ABI, signer);
+      const lendTx = await contract.lend({
+        value: ethers.utils.parseEther(_value.toString()),
+      });
       await lendTx.wait();
       return lendTx;
-      
-    }catch(err){
-      console.error(err)
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
+
+  const checkIsLender = async () => {
+    if (!signer) throw new Error("Signer Not Found");
+    const address = await signer?.getAddress();
+    const contract = new ethers.Contract(loanAddress, NFT_ABI, provider);
+    // filter through transfer events
+    const filterTransfer = contract.filters.Transfer(null, address, null);
+    // const checkTx = await contract.lend();
+    const query: any = await contract.queryFilter(filterTransfer);
+    let lendNftsPromises = await query?.map(
+      async (item: any, index: number) => {
+        const id = item?.args[2].toString();
+        const accRev = await contract.calculateSettledPayout(id);
+        return { id, accRev: ethers.utils.formatEther(accRev) };
+      }
+    );
+    const lendNfts = await Promise.all(lendNftsPromises);
+    setLender(lendNfts);
+    console.log(lendNfts);
+  };
+
+  const claimRepayment = async (amount: number, id: number) => {
+    try {
+      if (!signer) throw new Error("Signer Not Found");
+      const contract = new ethers.Contract(loanAddress, NFT_ABI, provider);
+      const claimTx = await contract.withdrawLender();
+      await claimTx.wait();
+      alert("Claim Successfull");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (signer) {
+      checkIsLender();
+    }
+  }, [signer]);
   return (
     <>
       <LendModal
@@ -77,7 +116,7 @@ const LoanPage = ({ metadata , loanAddress }: Props) => {
           <div className="border-l-2 pl-8 py-2 ">
             <p className="uppercase text-gray-500 mb-1">Amount Filled</p>
             <p className="font-medium text-lg ">
-              {(metadata?.amountFilled/metadata?.amount)*100} %
+              {(metadata?.amountFilled / metadata?.amount) * 100} %
             </p>
           </div>
 
@@ -133,7 +172,8 @@ const LoanPage = ({ metadata , loanAddress }: Props) => {
               LinkedIn <FiExternalLink />
             </a>
           </div>
-          <div className="flex items-center gap-4 justify-end">
+          {lender?.length > 0 && <RepayClaim data={lender} claimRepayment={claimRepayment} />}
+          <div className="fl}ex items-center gap-4 mt-4 justify-end">
             <Button
               onClick={() => setLendModal(true)}
               size="lg"
@@ -167,17 +207,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const metadataRes = await axios.get(
     metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
   );
+
   const metadata = metadataRes.data;
   return {
     props: {
       metadata: {
         ...metadata,
         borrowerAddress,
-      
+
         lends: Number(lends.toString()),
         amountFilled: ethers.utils.formatEther(filled),
       },
-      loanAddress
+      loanAddress,
     },
   };
 };

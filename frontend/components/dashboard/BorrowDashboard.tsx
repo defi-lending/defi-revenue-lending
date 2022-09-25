@@ -18,11 +18,9 @@ const BorrowDashboard = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loanContract, setLoanContract] = useState<Contract>({} as Contract);
   const { data: signer } = useSigner();
-  const [withdrawoading,setWithdrawLoading] = useState<boolean>(false);
-  const [repayLoading,setRepayLoading] = useState<boolean>(false);
-
-  
-
+  const [withdrawLoading, setWithdrawLoading] = useState<boolean>(false);
+  const [repayLoading, setRepayLoading] = useState<boolean>(false);
+  const [repayAmount, setRepayAmount] = useState<number>(0);
 
   if (!address) {
     return <div></div>;
@@ -73,33 +71,36 @@ const BorrowDashboard = (props: Props) => {
     }
   }, [signer]);
 
-  const handleRepay = async (amount:number) => {
-    setRepayLoading(true)
-    try{
-      const repayTx = await loanContract.payLoan(amount)
+  const handleRepay = async () => {
+    setRepayLoading(true);
+    try {
+      const repayTx = await loanContract.payLoan({
+        value: Number(ethers.constants.WeiPerEther) * repayAmount,
+      });
       await repayTx.wait();
-      alert('Repayment Successfull')
-    } catch (err){
-        console.error(err)
+      alert("Repayment Successfull");
+    } catch (err) {
+      alert(err);
+      console.error(err);
     }
-    setRepayLoading(false)
-  }
+    setRepayLoading(false);
+  };
 
-  const handleWithdraw = async  () => {
-    setWithdrawLoading(true)
-    try{
-      console.log(loan?.filledInWei)
-      const tx = await loanContract.withdrawBorrower(loan?.filledInWei)
-      await tx.wait()
+  const handleWithdraw = async () => {
+    setWithdrawLoading(true);
+    try {
+      console.log(loan?.filledInWei);
+      const tx = await loanContract.withdrawBorrower(loan?.filledInWei);
+      await tx.wait();
       console.log(tx);
-      alert("withdraw successfull")
-    }catch(err){
-      alert('Loan has not been filled')
-      console.log(err)
+      alert("withdraw successfull");
+    } catch (err) {
+      alert("Loan has not been filled");
+      console.log(err);
     }
-    setWithdrawLoading(false) 
-  }
-  
+    setWithdrawLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -128,13 +129,16 @@ const BorrowDashboard = (props: Props) => {
             {Number(loan?.filledAmount).toFixed(2)} / {loan?.amount} MATIC
           </p>
         </div>
-        <Button variant="success" className="mt-4" onClick={handleWithdraw}> Withdraw funds</Button>
+        <Button variant="success" className="mt-4" loading={withdrawLoading} onClick={handleWithdraw}>
+          {" "}
+          Withdraw funds
+        </Button>
       </div>
 
       <div className="bg-white border rounded-lg p-6">
-      <div className="mb-2 ">
+        <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
-           Repayable Amount : 
+            Repayable Amount :
           </p>
           <p>{loan?.amount * 1.1} MATIC</p>
         </div>
@@ -148,16 +152,36 @@ const BorrowDashboard = (props: Props) => {
           <p className="font-medium text-gray-500 text-sm">
             Total Repayed Amount :{" "}
           </p>
-          <p>{loan?.repayedAmount} / {loan?.amount*1.1}MATIC</p>
+          <p>
+            {loan?.repayedAmount} / {loan?.amount * 1.1}MATIC
+          </p>
         </div>{" "}
         <div className="mb-2">
           <p className="font-medium text-sm text-gray-500 ">
             Total Withdrawn Amount :{" "}
           </p>
-          <p>
-            {loan?.withdrawnAmount} MATIC 
-          </p>
-          <Button variant="primary" className="mt-4" loading={repayLoading} >Repay Lenders</Button>
+          <p>{loan?.withdrawnAmount} MATIC</p>
+          <div className="flex items-center border-t pt-2 mt-2 justify-between">
+            <label className="flex flex-col gap-2">
+              Repay : {repayAmount} MATIC
+              <input
+                value={repayAmount}
+                onChange={(e) => setRepayAmount(Number(e.target.value))}
+                step={(Number(loan?.filledAmount) / 10).toFixed(2)}
+                type="range"
+                min={0}
+                max={Number(loan?.filledAmount).toFixed(2)}
+              />
+            </label>
+            <Button
+              variant="primary"
+              className="mt-4"
+              loading={repayLoading}
+              onClick={handleRepay}
+            >
+              Repay Lenders
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -55,33 +55,61 @@ const useBorrowContract = () => {
   const getAllBorrowers = async () => {
     try {
       //  Get all LoanRequestCreation events
-      const loanAddresses = await borrowContract.getAllBorrowerLoanRequests();
-      let promises = await loanAddresses.map(async (address: string) => {
-        const loanContract = new ethers.Contract(address, NFT_ABI, provider);
-        const metadataUri = await loanContract.baseURI();
-        // const borrowerAddress = await loanContract.borrower();
-        const loanFilled = await loanContract.fundedAmount();
-        // get the actual metadata object from uri
-        const metadataRes = await axios.get(
-          metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
-        );
-        if(metadataRes.data){
-          return {...metadataRes.data,loanAddress:address,loanFilled}
+      // const loanAddresses = await borrowContract.getAllBorrowerLoanRequests();
+      // let promises = await loanAddresses.map(async (address: string) => {
+      //   const loanContract = new ethers.Contract(address, NFT_ABI, provider);
+      //   const metadataUri = await loanContract.baseURI();
+      //   // const borrowerAddress = await loanContract.borrower();
+      //   const loanFilled = await loanContract.fundedAmount();
+      //   // get the actual metadata object from uri
+      //   const metadataRes = await axios.get(
+      //     metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
+      //   );
+      //   if(metadataRes.data){
+      //     return {...metadataRes.data,loanAddress:address,loanFilled}
+      //   }
+      // });
+
+      const filter = borrowContract.filters.LoanRequestCreation(
+        null,
+        null,
+        null
+      );
+      // const loanRequests = await Promise.all(promises)
+      const query = await borrowContract.queryFilter(filter);
+      const promises = await query.map(async (item) => {
+        if (item.args) {
+          const metadataUri = item?.args[2];
+          const loanAddress = item?.args[1];
+          const loanContract = new ethers.Contract(
+            loanAddress,
+            NFT_ABI,
+            provider
+          );
+          const loanFilled = await loanContract.fundedAmount();
+          // get the actual metadata object from uri
+          const {data }= await axios.get(
+            metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
+          );
+          return {...data,loanAddress,loanFilled}
         }
       });
-      const loanRequests = await Promise.all(promises)
-      return loanRequests;
+      const loans = await Promise.all(promises);
+      console.log(loans);
+      return loans
     } catch (err) {
       console.error(err);
     }
   };
 
-  const getLoanAddress = async (borrowerAddress:string) => {
-    const loanAddress = await borrowContract.loanRequestAddresses(borrowerAddress)
+  const getLoanAddress = async (borrowerAddress: string) => {
+    const loanAddress = await borrowContract.loanRequestAddresses(
+      borrowerAddress
+    );
     return loanAddress;
-  }
+  };
 
-  return { createBorrowRequest, getAllBorrowers ,getLoanAddress};
+  return { createBorrowRequest, getAllBorrowers, getLoanAddress };
 };
 
 export default useBorrowContract;
