@@ -5,20 +5,31 @@ import "./RevenueBasedLoan.sol";
 
 contract BorrowerLoans {
     address[] public borrowers;
-    mapping(address => RevenueBasedLoan) public loanRequestAddresses;
-    mapping(address => uint256) public borrowerLoans;
+    mapping(address => address) public loanRequestAddresses;
+    event LoanRequestCreation(
+        address indexed borrower,
+        address loanRequest,
+        string baseURI
+    );
 
     function createBorrowerLoan(
         uint256 loanAmount_,
-        uint8 payoutRate_,
+        uint16 payoutRate_, // Percentage of monthly revenue towards repayment. Two decimal points - Ex: 5.35% = 535
         uint256 loanFee_,
         string memory baseURI_
     ) public returns (bool) {
         require(
-            borrowerLoans[msg.sender] == 0,
+            loanRequestAddresses[msg.sender] == address(0),
             "Borrower already published a request"
         );
-        require(loanAmount_ > 0, "Borrower already published a request");
+        require(loanAmount_ > 0, "Loan amount can't be 0");
+        require(
+            payoutRate_ > 0 && payoutRate_ <= 10000,
+            "Can't pay 0% nor above 100% of revenue"
+        );
+        require(loanFee_ > 0, "Loan fee has to be greater than 0");
+        require(bytes(baseURI_).length > 0, "baseURI must be non-empty");
+
         RevenueBasedLoan loanRequest = new RevenueBasedLoan(
             "Revenue Based Loan",
             "RBL",
@@ -26,16 +37,31 @@ contract BorrowerLoans {
             payoutRate_,
             loanFee_,
             msg.sender,
-            7,
+            7, // loan has to be filled within a week
             baseURI_
         );
         borrowers.push(msg.sender);
-        loanRequestAddresses[msg.sender] = loanRequest;
-        borrowerLoans[msg.sender] = loanAmount_;
+        loanRequestAddresses[msg.sender] = address(loanRequest);
+
+        emit LoanRequestCreation(msg.sender, address(loanRequest), baseURI_);
         return true;
     }
 
     function getAllBorrowers() external view returns (address[] memory) {
         return borrowers;
+    }
+
+    function getAllBorrowerLoanRequests()
+        external
+        view
+        returns (address[] memory)
+    {
+        address[] memory borrowerReqs = new address[](borrowers.length);
+
+        for (uint256 idx = 0; idx < borrowers.length; idx++) {
+            borrowerReqs[idx] = loanRequestAddresses[borrowers[idx]];
+        }
+
+        return borrowerReqs;
     }
 }
