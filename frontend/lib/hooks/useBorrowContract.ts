@@ -76,7 +76,12 @@ const useBorrowContract = () => {
     }
   };
 
-  return { createBorrowRequest, getAllBorrowers };
+  const getLoanAddress = async (borrowerAddress:string) => {
+    const loanAddress = await borrowContract.loanRequestAddresses(borrowerAddress)
+    return loanAddress;
+  }
+
+  return { createBorrowRequest, getAllBorrowers ,getLoanAddress};
 };
 
 export default useBorrowContract;
