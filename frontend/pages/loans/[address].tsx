@@ -6,9 +6,10 @@ import { NFT_ABI } from "contracts/RevenueBasedLoanNft";
 import { Contract, ethers } from "ethers";
 import { GetServerSideProps } from "next";
 import React, { useEffect, useState } from "react";
+import { LoopingRhombusesSpinner } from "react-epic-spinners";
 import { FiExternalLink } from "react-icons/fi";
 import { BorrowLoanFormData, StripeReport } from "types";
-import { chain, useProvider, useSigner } from "wagmi";
+import { useProvider, useSigner } from "wagmi";
 
 type BorrowerMetadata = BorrowLoanFormData & { stripeReport: StripeReport } & {
   borrowerAddress: string;
@@ -17,16 +18,44 @@ type BorrowerMetadata = BorrowLoanFormData & { stripeReport: StripeReport } & {
 };
 
 type Props = {
-  metadata: BorrowerMetadata;
-  loanContract: Contract;
   loanAddress: string;
 };
 
-const LoanPage = ({ metadata, loanAddress }: Props) => {
+const LoanPage = ({ loanAddress }: Props) => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [lendModal, setLendModal] = useState<boolean>(false);
   const { data: signer } = useSigner();
   const [lender, setLender] = useState<any>(null);
-  const provider = useProvider();
+  const provider = useProvider({ chainId: 8001 });
+  const [metadata, setMetadata] = useState<any>({});
+
+  useEffect(() => {
+    getLoanData();
+  }, [provider]);
+
+  const getLoanData = async () => {
+    setLoading(true);
+    const loanContract = new ethers.Contract(loanAddress, NFT_ABI, provider);
+    const metadataUri = await loanContract.baseURI();
+    const borrowerAddress = await loanContract.borrower();
+    // amount filled
+    const filled = await loanContract.fundedAmount();
+    // number of lenders
+    const lends = await loanContract.loansEmitted();
+
+    const metadataRes = await axios.get(
+      metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
+    );
+
+    const metadata = metadataRes.data;
+    setMetadata({
+      ...metadata,
+      borrowerAddress,
+      lends: Number(lends.toString()),
+      amountFilled: ethers.utils.formatEther(filled),
+    });
+    setLoading(false);
+  };
   const handleLend = async (_value: number) => {
     try {
       if (!signer) throw new Error("Signer Not Found");
@@ -80,6 +109,13 @@ const LoanPage = ({ metadata, loanAddress }: Props) => {
       checkIsLender();
     }
   }, [signer]);
+
+  if (loading)
+    return (
+      <div className="flex space-y-8 items-center justify-center py-28">
+        <LoopingRhombusesSpinner color="rgb(59,130,240)" />
+      </div>
+    );
   return (
     <>
       <LendModal
@@ -172,7 +208,9 @@ const LoanPage = ({ metadata, loanAddress }: Props) => {
               LinkedIn <FiExternalLink />
             </a>
           </div>
-          {lender?.length > 0 && <RepayClaim data={lender} claimRepayment={claimRepayment} />}
+          {lender?.length > 0 && (
+            <RepayClaim data={lender} claimRepayment={claimRepayment} />
+          )}
           <div className="fl}ex items-center gap-4 mt-4 justify-end">
             <Button
               onClick={() => setLendModal(true)}
@@ -191,33 +229,8 @@ const LoanPage = ({ metadata, loanAddress }: Props) => {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const loanAddress = context?.params?.address as string;
 
-  const provider = new ethers.providers.AlchemyProvider(
-    chain.polygonMumbai.id,
-    process.env.ALCHEMY_KEY
-  );
-
-  const loanContract = new ethers.Contract(loanAddress, NFT_ABI, provider);
-  const metadataUri = await loanContract.baseURI();
-  const borrowerAddress = await loanContract.borrower();
-  // amount filled
-  const filled = await loanContract.fundedAmount();
-  // number of lenders
-  const lends = await loanContract.loansEmitted();
-
-  const metadataRes = await axios.get(
-    metadataUri.replace("ipfs://", "https://ipfs.io/ipfs/")
-  );
-
-  const metadata = metadataRes.data;
   return {
     props: {
-      metadata: {
-        ...metadata,
-        borrowerAddress,
-
-        lends: Number(lends.toString()),
-        amountFilled: ethers.utils.formatEther(filled),
-      },
       loanAddress,
     },
   };
