@@ -150,7 +150,7 @@ const BorrowDashboard = (props: Props) => {
         </div>
         <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
-            Total Repayed Amount :{" "}
+            Total Repaid Amount :{" "}
           </p>
           <p>
             {loan?.repayedAmount} / {loan?.amount * 1.1}MATIC
