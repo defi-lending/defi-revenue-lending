@@ -43,7 +43,7 @@ const ShowRevenueReport = ({ stripeKey, setStep, setReport }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center gap-8 py-28">
         <LoopingRhombusesSpinner color="rgb(59,130,240)" />
-        Generating Revenue report ... 
+        Pulling Revenue report ... 
       </div>
     );
 

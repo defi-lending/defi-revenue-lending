@@ -144,14 +144,14 @@ const BorrowDashboard = (props: Props) => {
           <p className="font-medium text-gray-500 text-sm">
             Total number of lenders:
           </p>
-          <p>{loan?.lends} LENDERS</p>
+          <p>{loan?.lends}</p>
         </div>
         <div className="mb-2 ">
           <p className="font-medium text-gray-500 text-sm">
             Total Repaid Amount :{" "}
           </p>
-          <p>
-            {Number(loan?.repaidAmount).toFixed(2)} / {Number((loan?.amount * 1.1)).toFixed(2)}MATIC
+          <p>P
+            {Number(loan?.repaidAmount).toFixed(2)} / {Number((loan?.amount * 1.1)).toFixed(2)} MATIC
           </p>
         </div>{" "}
         <div className="mb-2">
