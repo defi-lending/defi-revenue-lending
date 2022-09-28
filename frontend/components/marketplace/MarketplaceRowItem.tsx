@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { currencyFormat } from "lib/utils";
 import Link from "next/link";
 import React from "react";
 import { BorrowLoanFormData, StripeReport } from "types";
@@ -23,7 +24,7 @@ const MarketplaceRowItem = ({ data }: Props) => {
           <div className="pl-3">{data?.name}</div>
         </th>
         <td className="py-4 px-6 text-center whitespace-pre-wrap">
-          {Number(data?.stripeReport?.activity).toFixed(2)}{" "}
+          {currencyFormat(Number(data?.stripeReport?.activity))}{" "}
           {data?.stripeReport?.currency.toUpperCase()}
         </td>
         <td className="py-4 px-6 text-center">{data?.amount} MATIC</td>

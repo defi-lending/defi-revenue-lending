@@ -8,6 +8,7 @@ import { UseFormRegister, UseFormWatch } from "react-hook-form";
 import { BorrowLoanFormData, StripeReport } from "types";
 import { Dispatch, SetStateAction } from "react";
 import { Steps } from "pages/borrow";
+import { currencyFormat } from "lib/utils";
 
 type Props = {
   register: UseFormRegister<BorrowLoanFormData>;
@@ -15,10 +16,6 @@ type Props = {
   report: StripeReport | null;
   watch: UseFormWatch<BorrowLoanFormData>;
 };
-
-function currencyFormat(num: number) {
-  return num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-}
 
 const AddBorrowRequestDetails = ({
   register,

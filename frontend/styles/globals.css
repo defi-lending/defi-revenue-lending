@@ -11,7 +11,11 @@
     font-family: "Sora", sans-serif;
     @apply min-h-screen bg-gray-100;
   }
+
   
+  .card {
+    @apply bg-white  rounded-xl p-6
+  }
 }
 
 
