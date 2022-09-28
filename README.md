@@ -116,5 +116,3 @@ or, to fix:
 ```
 yarn lint:fix
 ```
-
-# Many thanks to the freeCodeCamp from [Patrick](https://github.com/smartcontractkit/full-blockchain-solidity-course-js#lesson-2-welcome-to-remix-simple-storage)!
