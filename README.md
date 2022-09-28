@@ -16,7 +16,7 @@
 
 ```
 git clone https://github.com/Lisanaaa/Revenue-Based-Defi.git
-cd Revenue-Based-Defi
+cd defi-revenue-lending
 yarn
 yarn hardhat
 ```
@@ -51,7 +51,7 @@ npx hardhat test
 
 And you'll see and output file called `gas-report.txt`
 
-## Local Deployment 
+## Local Deployment
 
 If you'd like to run your own local hardhat network, you can run:
 
@@ -69,7 +69,7 @@ And you should see transactions happen in your terminal that is running `npx har
 
 ### Important localhost note
 
-If you use metamask with a local network, everytime you shut down your node, you'll need to reset your account. Settings -> Advanced -> Reset account. Don't do this with a metamask you have real funds in. And maybe don't do this if you're a little confused by this. 
+If you use metamask with a local network, everytime you shut down your node, you'll need to reset your account. Settings -> Advanced -> Reset account. Don't do this with a metamask you have real funds in. And maybe don't do this if you're a little confused by this.
 
 ## Deployment to a testnet or mainnet
 
@@ -106,13 +106,15 @@ npx hardhat verify --constructor-args arguments.js DEPLOYED_CONTRACT_ADDRESS
 # Linting
 
 To check linting / code formatting:
+
 ```
 yarn lint
 ```
-or, to fix: 
+
+or, to fix:
+
 ```
 yarn lint:fix
 ```
 
 # Many thanks to the freeCodeCamp from [Patrick](https://github.com/smartcontractkit/full-blockchain-solidity-course-js#lesson-2-welcome-to-remix-simple-storage)!
-
